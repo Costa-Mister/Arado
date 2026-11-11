@@ -2,887 +2,884 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IF Goiano - Campus Ipameri | Saúde Sexual e Reprodutiva</title>
-    <!-- Google Fonts: Poppins e Open Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Torto Arado - Game Feel & Ação (Phaser 3)</title>
+    <!-- Phaser 3.80 via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.0/dist/phaser.min.js"></script>
     <style>
-        :root {
-            --font-scale: 1rem;
-            /* Paleta de Cores baseada na imagem enviada: Almond (#F4DAD4), Dull Pink (#DD8C96), Rhino (#2E4060) */
-            --bg-main: #F4DAD4;
-            --surface-card: #FFFFFF;
-            --border-color: #DD8C96;
-            --text-main: #2E4060;
-            --text-muted: #52637F;
-            --primary-pink: #DD8C96;
-            --primary-pink-bg: #FDF5F3;
-            --if-green: #2f9e41;
-            --if-red: #e31c1c;
-            --if-blue: #1d3557;
-            --highlight-speaking: #FEF08A;
-            --highlight-border: #DD8C96;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-
-        body.high-contrast {
-            --bg-main: #000000;
-            --surface-card: #121212;
-            --border-color: #FFFF00;
-            --text-main: #FFFF00;
-            --text-muted: #FFFFCC;
-            --primary-pink: #FFFF00;
-            --primary-pink-bg: #1A1A00;
-            --if-green: #FFFF00;
-            --if-red: #FFFF00;
-            --if-blue: #FFFF00;
-            --highlight-speaking: #333300;
-            --highlight-border: #FFFF00;
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0d0907;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-
-        html {
-            font-size: var(--font-scale);
-            scroll-behavior: smooth;
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
+        /* Controles Touch Virtuais para Mobile */
+        #touch-controls {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            width: 100%;
+            height: 130px;
+            display: none;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 100;
         }
-
-        .custom-card {
-            background-color: var(--surface-card);
-            border: 2px solid var(--border-color);
-            border-radius: 24px;
-            box-shadow: 0 10px 25px -5px rgba(46, 64, 96, 0.08), 0 8px 10px -6px rgba(46, 64, 96, 0.02);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        .dpad {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            pointer-events: auto;
         }
-
-        .custom-card:hover {
-            box-shadow: 0 20px 30px -10px rgba(46, 64, 96, 0.12);
+        .dbtn {
+            position: absolute;
+            background: rgba(230, 210, 180, 0.35);
+            border: 2px solid rgba(120, 80, 40, 0.7);
+            border-radius: 10px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 18px;
         }
-
-        .speaking-highlight {
-            border-color: var(--highlight-border) !important;
-            background-color: var(--highlight-speaking) !important;
-            transform: scale(1.01);
-            box-shadow: 0 0 20px rgba(221, 140, 150, 0.6) !important;
+        .dbtn:active { background: rgba(230, 210, 180, 0.75); }
+        #btn-up { top: 0; left: 44px; }
+        #btn-down { bottom: 0; left: 44px; }
+        #btn-left { top: 44px; left: 0; }
+        #btn-right { top: 44px; right: 0; }
+        
+        .action-btns {
+            position: relative;
+            width: 100px;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
         }
-
-        /* Logo Oficial Matriz 3x4 */
-        .if-symbol {
-            display: grid;
-            grid-template-columns: repeat(3, 10px);
-            grid-template-rows: repeat(4, 10px);
-            gap: 3px;
-        }
-
-        .block {
-            background-color: var(--if-green);
-            border-radius: 2px;
-        }
-
-        .circle-red {
-            background-color: var(--if-red);
+        .abtn {
+            width: 72px;
+            height: 72px;
+            background: rgba(212, 107, 39, 0.6);
+            border: 3px solid rgba(140, 50, 20, 0.9);
             border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 1px 1px 2px #000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
         }
+        .abtn:active { background: rgba(212, 107, 39, 0.95); }
 
-        .empty {
-            background-color: transparent;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .tab-content {
-            display: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-        }
-        .animate-sparkle {
-            animation: pulseGlow 2s infinite;
+        @media (max-pointer: coarse) {
+            #touch-controls { display: flex; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between pb-24">
+<body>
 
-    <!-- TOP HEADER -->
-    <header class="w-full bg-[var(--surface-card)] border-b-2 border-[var(--border-color)] sticky top-0 z-40 shadow-sm transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                
-                <!-- LOGO IF GOIANO -->
-                <div class="flex items-center gap-4">
-                    <div class="if-symbol p-1.5 bg-gray-50 border border-gray-200 rounded-xl shadow-inner flex-shrink-0" aria-label="Logo do IF Goiano">
-                        <!-- Linha 1 -->
-                        <div class="circle-red"></div>
-                        <div class="block"></div>
-                        <div class="block"></div>
-                        <!-- Linha 2 -->
-                        <div class="block"></div>
-                        <div class="block"></div>
-                        <div class="empty"></div>
-                        <!-- Linha 3 -->
-                        <div class="block"></div>
-                        <div class="block"></div>
-                        <div class="block"></div>
-                        <!-- Linha 4 -->
-                        <div class="block"></div>
-                        <div class="block"></div>
-                        <div class="empty"></div>
-                    </div>
+<div id="game-container"></div>
 
-                    <div class="border-l-2 border-[var(--if-green)] pl-3" style="font-family: 'Open Sans', sans-serif;">
-                        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight text-[var(--if-blue)]">
-                            INSTITUTO FEDERAL <span class="text-[var(--if-green)]">GOIANO</span>
-                        </h1>
-                        <p class="text-xs sm:text-sm font-medium text-[var(--text-muted)] tracking-wider uppercase">
-                            Campus Ipameri &bull; Saúde Sexual e Reprodutiva
-                        </p>
-                    </div>
-                </div>
-
-                <!-- ALUNOS & TURMA 1º ANO DE ADM (Card com largura ideal para múltiplas linhas) -->
-                <div class="custom-card p-3.5 px-5 flex flex-col gap-2.5 w-full lg:w-[480px]">
-                    <div class="flex items-center gap-1.5 font-bold text-xs uppercase text-[var(--primary-pink)] bg-[var(--primary-pink-bg)] px-3 py-1 rounded-full w-fit border border-[var(--primary-pink)]">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-[var(--primary-pink)] animate-sparkle"></i>
-                        <span>Alunos (1º Ano de ADM):</span>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5 text-xs font-medium">
-                        <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg hover:bg-[var(--primary-pink-bg)] hover:text-[var(--primary-pink)] transition-colors cursor-default">Sophia Rosa</span>
-                        <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg hover:bg-[var(--primary-pink-bg)] hover:text-[var(--primary-pink)] transition-colors cursor-default">Laura Rosa</span>
-                        <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg hover:bg-[var(--primary-pink-bg)] hover:text-[var(--primary-pink)] transition-colors cursor-default">Letícia Mesak</span>
-                        <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg hover:bg-[var(--primary-pink-bg)] hover:text-[var(--primary-pink)] transition-colors cursor-default">João Pedro Oliveira</span>
-                        <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg hover:bg-[var(--primary-pink-bg)] hover:text-[var(--primary-pink)] transition-colors cursor-default">Gabriel Marcelino</span>
-                        <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 rounded-lg hover:bg-[var(--primary-pink-bg)] hover:text-[var(--primary-pink)] transition-colors cursor-default">Gabriel Cardoso</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- NAVIGATION TABS -->
-        <div class="bg-[var(--surface-card)] border-t border-[var(--border-color)]">
-            <div class="max-w-7xl mx-auto px-2 sm:px-6">
-                <nav class="flex space-x-2 sm:space-x-4 overflow-x-auto no-scrollbar py-2" aria-label="Navegação Principal">
-                    <button onclick="switchTab('inicio')" id="tab-btn-inicio" class="nav-tab active flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-200 bg-[var(--primary-pink)] text-white shadow-md">
-                        <i data-lucide="home" class="w-4 h-4"></i>
-                        <span>Início</span>
-                    </button>
-
-                    <button onclick="switchTab('ists')" id="tab-btn-ists" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-200 text-[var(--text-muted)] hover:bg-gray-100">
-                        <i data-lucide="shield-alert" class="w-4 h-4"></i>
-                        <span>Guia de ISTs</span>
-                    </button>
-
-                    <button onclick="switchTab('contracepcao')" id="tab-btn-contracepcao" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-200 text-[var(--text-muted)] hover:bg-gray-100">
-                        <i data-lucide="heart-pulse" class="w-4 h-4"></i>
-                        <span>Contracepção</span>
-                    </button>
-
-                    <button onclick="switchTab('midia')" id="tab-btn-midia" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-200 text-[var(--text-muted)] hover:bg-gray-100">
-                        <i data-lucide="video" class="w-4 h-4"></i>
-                        <span>Vídeos & Mídia</span>
-                    </button>
-
-                    <button onclick="switchTab('sus')" id="tab-btn-sus" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-200 text-[var(--text-muted)] hover:bg-gray-100">
-                        <i data-lucide="building-2" class="w-4 h-4"></i>
-                        <span>Saúde Pública (SUS)</span>
-                    </button>
-                </nav>
-            </div>
-        </div>
-    </header>
-
-    <!-- BANNER DE STATUS DE LEITURA POR VOZ -->
-    <div id="speech-banner" class="hidden sticky top-[128px] z-30 bg-amber-500 text-black px-4 py-2 text-center text-sm font-bold shadow-lg flex items-center justify-center gap-2">
-        <i data-lucide="volume-2" class="w-5 h-5 animate-bounce"></i>
-        <span id="speech-banner-text">🔊 Lendo conteúdo em voz alta...</span>
-        <button onclick="stopSpeech()" class="ml-4 px-2 py-0.5 bg-black text-white text-xs rounded hover:bg-gray-800">Parar</button>
+<!-- Touch Controls Overlay para Mobile -->
+<div id="touch-controls">
+    <div class="dpad">
+        <div class="dbtn" id="btn-up">▲</div>
+        <div class="dbtn" id="btn-down">▼</div>
+        <div class="dbtn" id="btn-left">◄</div>
+        <div class="dbtn" id="btn-right">►</div>
     </div>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-
-        <!-- 1. ABA: INÍCIO -->
-        <section id="tab-inicio" class="tab-content active space-y-8">
-            <div class="custom-card p-8 bg-gradient-to-br from-[var(--primary-pink-bg)] to-white border-l-8 border-l-[var(--primary-pink)]">
-                <div class="max-w-3xl space-y-4">
-                    <span class="px-3 py-1 bg-[var(--primary-pink)] text-white text-xs font-bold uppercase rounded-full tracking-wider">
-                        Projeto Educativo Institucional (1º Ano de ADM)[cite: 3]
-                    </span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-[var(--text-main)] leading-tight">
-                        Conhecimento, Prevenção e Autonomia para a sua Saúde
-                    </h2>
-                    <p class="text-base sm:text-lg text-[var(--text-muted)] font-normal leading-relaxed">
-                        Bem-vindo ao portal de saúde sexual e reprodutiva do <strong>IF Goiano - Campus Ipameri</strong>. Nosso objetivo é fornecer informações científicas, acessíveis e livres de preconceito para toda a comunidade acadêmica e comunidade local de Ipameri.
-                    </p>
-                    <div class="pt-2 flex flex-wrap gap-3">
-                        <button onclick="switchTab('ists')" class="px-5 py-3 bg-[var(--if-green)] text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm">
-                            Explorar Guia de ISTs <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="switchTab('sus')" class="px-5 py-3 bg-white border border-gray-300 font-bold text-sm rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm">
-                            Serviços do SUS em Ipameri
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="custom-card p-6 flex flex-col justify-between hover:border-[var(--primary-pink)]">
-                    <div class="space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-pink-100 text-[var(--primary-pink)] flex items-center justify-center">
-                            <i data-lucide="shield-check" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Prevenção Combinada</h3>
-                        <p class="text-sm text-[var(--text-muted)] leading-relaxed">
-                            Entenda como alinhar preservativos, vacinação, testagem regular e profilaxias (PrEP/PEP) para uma proteção completa.
-                        </p>
-                    </div>
-                    <button onclick="switchTab('ists')" class="mt-4 text-xs font-bold text-[var(--primary-pink)] uppercase tracking-wider flex items-center gap-1 hover:underline">
-                        Saber mais &rarr;
-                    </button>
-                </div>
-
-                <div class="custom-card p-6 flex flex-col justify-between hover:border-[var(--if-green)]">
-                    <div class="space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-green-100 text-[var(--if-green)] flex items-center justify-center">
-                            <i data-lucide="heart" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Métodos Contraceptivos</h3>
-                        <p class="text-sm text-[var(--text-muted)] leading-relaxed">
-                            Conheça as opções hormonais, de barreira e de longa duração (DIU/Implantes) para escolhas conscientes e seguras.
-                        </p>
-                    </div>
-                    <button onclick="switchTab('contracepcao')" class="mt-4 text-xs font-bold text-[var(--if-green)] uppercase tracking-wider flex items-center gap-1 hover:underline">
-                        Ver métodos &rarr;
-                    </button>
-                </div>
-
-                <div class="custom-card p-6 flex flex-col justify-between hover:border-blue-500">
-                    <div class="space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                            <i data-lucide="hospital" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Acesso Gratuito no SUS</h3>
-                        <p class="text-sm text-[var(--text-muted)] leading-relaxed">
-                            O SUS garante distribuição gratuita de preservativos, vacinas contra HPV e Hepatite B, além de testes rápidos e tratamento.
-                        </p>
-                    </div>
-                    <button onclick="switchTab('sus')" class="mt-4 text-xs font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1 hover:underline">
-                        Rede do SUS &rarr;
-                    </button>
-                </div>
-            </div>
-
-            <!-- Dados Importantes sobre a Saúde do Jovem -->
-            <div class="custom-card p-6 bg-[var(--text-main)] text-white border-none">
-                <h3 class="text-lg font-bold text-gray-200 mb-4 flex items-center gap-2">
-                    <i data-lucide="bar-chart-2" class="w-5 h-5 text-[var(--primary-pink)]"></i> Dados Importantes sobre a Saúde do Jovem
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-                    <div class="p-4 bg-opacity-20 bg-white rounded-xl">
-                        <span class="block text-3xl font-extrabold text-[var(--primary-pink)]">100%</span>
-                        <span class="text-xs text-gray-300 mt-1 block">Gratuito no SUS (Preservativos e Testes)</span>
-                    </div>
-                    <div class="p-4 bg-opacity-20 bg-white rounded-xl">
-                        <span class="block text-3xl font-extrabold text-blue-300">99%</span>
-                        <span class="text-xs text-gray-300 mt-1 block">Eficácia do preservativo no uso correto</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 2. ABA: GUIA DE ISTS -->
-        <section id="tab-ists" class="tab-content space-y-6">
-            <div class="border-b border-gray-200 pb-4">
-                <h2 class="text-2xl sm:text-3xl font-bold text-[var(--text-main)] flex items-center gap-3">
-                    <i data-lucide="shield-alert" class="w-8 h-8 text-[var(--if-red)]"></i>
-                    Guia Informativo de Infecções Sexualmente Transmissíveis (ISTs)
-                </h2>
-                <p class="text-sm text-[var(--text-muted)] mt-1">
-                    Conhecer os sintomas, formas de prevenção e a importância da testagem regular é a melhor defesa.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="custom-card p-6 space-y-4 border-l-4 border-l-red-500">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-red-600 flex items-center gap-2">
-                            <i data-lucide="activity" class="w-5 h-5"></i> HIV / AIDS
-                        </h3>
-                        <span class="px-2.5 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full">Vírus</span>
-                    </div>
-                    <p class="text-sm text-[var(--text-muted)]">
-                        O HIV ataca o sistema imunológico. Pessoas em tratamento adequado atingem a carga viral Indetectável, tornando o vírus Intransmissível (I=I).
-                    </p>
-                    <div class="space-y-2 text-xs text-[var(--text-main)]">
-                        <div><strong>Sintomas:</strong> Febre, mal-estar e dores de cabeça nas fases iniciais; muitas vezes assintomático por anos.</div>
-                        <div><strong>Prevenção:</strong> Preservativo masculino/feminino, PrEP (Profilaxia Pré-Exposição) e PEP (Profilaxia Pós-Exposição).</div>
-                        <div><strong>Testagem:</strong> Testes rápidos de fluido oral ou sangue disponíveis gratuitamente na rede pública.</div>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 space-y-4 border-l-4 border-l-purple-500">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-purple-600 flex items-center gap-2">
-                            <i data-lucide="virus" class="w-5 h-5"></i> HPV (Papilomavírus Humano)
-                        </h3>
-                        <span class="px-2.5 py-1 text-xs font-semibold bg-purple-100 text-purple-700 rounded-full">Vírus</span>
-                    </div>
-                    <p class="text-sm text-[var(--text-muted)]">
-                        Infecção viral extremamente comum. Alguns tipos podem causar verrugas genitais e outros estão associados ao câncer de colo do útero.
-                    </p>
-                    <div class="space-y-2 text-xs text-[var(--text-main)]">
-                        <div><strong>Sintomas:</strong> Verrugas na região genital ou anal (às vezes invisíveis a olho nu).</div>
-                        <div><strong>Prevenção:</strong> Vacina quadrivalente gratuita no SUS para jovens de 9 a 14 anos e preservativo.</div>
-                        <div><strong>Diagnóstico:</strong> Exame Papanicolau nas mulheres e avaliação clínica.</div>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 space-y-4 border-l-4 border-l-amber-500">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-amber-600 flex items-center gap-2">
-                            <i data-lucide="bacteria" class="w-5 h-5"></i> Sífilis
-                        </h3>
-                        <span class="px-2.5 py-1 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">Bactéria</span>
-                    </div>
-                    <p class="text-sm text-[var(--text-muted)]">
-                        Infecção bacteriana curável. Se não tratada, pode evoluir para estágios graves afetando o cérebro, coração e ossos.
-                    </p>
-                    <div class="space-y-2 text-xs text-[var(--text-main)]">
-                        <div><strong>Sintomas:</strong> Ferida indolor no local de infecção (cancro duro), seguida de manchas no corpo, mãos e pés.</div>
-                        <div><strong>Tratamento:</strong> Penicilina (disponível gratuitamente na Unidade Básica de Saúde).</div>
-                        <div><strong>Prevenção:</strong> Uso correto de preservativos e testagem em todas as consultas pré-natais.</div>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 space-y-4 border-l-4 border-l-blue-500">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-blue-600 flex items-center gap-2">
-                            <i data-lucide="droplet" class="w-5 h-5"></i> Clamídia e Gonorreia
-                        </h3>
-                        <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">Bactérias</span>
-                    </div>
-                    <p class="text-sm text-[var(--text-muted)]">
-                        Infecções bacterianas muito frequentes que atingem os órgãos genitais, garganta e olhos, podendo causar infertilidade se não tratadas.
-                    </p>
-                    <div class="space-y-2 text-xs text-[var(--text-main)]">
-                        <div><strong>Sintomas:</strong> Dor ao urinar, corrimento amarelado ou esbranquiçado e dor no pé da barriga.</div>
-                        <div><strong>Tratamento:</strong> Antibióticos específicos prescritos por médico na UBS.</div>
-                        <div><strong>Prevenção:</strong> Preservativos em todas as relações sexuais.</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. ABA: CONTRACEPÇÃO -->
-        <section id="tab-contracepcao" class="tab-content space-y-6">
-            <div class="border-b border-gray-200 pb-4">
-                <h2 class="text-2xl sm:text-3xl font-bold text-[var(--text-main)] flex items-center gap-3">
-                    <i data-lucide="heart-pulse" class="w-8 h-8 text-[var(--primary-pink)]"></i>
-                    Métodos Contraceptivos & Planejamento
-                </h2>
-                <p class="text-sm text-[var(--text-muted)] mt-1">
-                    Conheça os diferentes métodos para prevenir uma gravidez não planejada e escolha o mais adequado com auxílio médico.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="custom-card p-5 space-y-3 flex flex-col justify-between">
-                    <div>
-                        <div class="p-3 bg-pink-100 text-[var(--primary-pink)] w-fit rounded-xl mb-3">
-                            <i data-lucide="shield" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-lg font-bold">Barreira</h3>
-                        <p class="text-xs text-gray-500 mb-2">Preservativos Externo e Interno</p>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            <strong>Eficácia:</strong> 98% no uso correto.<br>
-                            <strong>Vantagem única:</strong> É o único método que previne simultaneamente uma gravidez não planejada e ISTs.
-                        </p>
-                    </div>
-                    <span class="inline-block px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-lg text-center">
-                        Disponível Grátis no SUS
-                    </span>
-                </div>
-
-                <div class="custom-card p-5 space-y-3 flex flex-col justify-between">
-                    <div>
-                        <div class="p-3 bg-purple-100 text-purple-600 w-fit rounded-xl mb-3">
-                            <i data-lucide="clock" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-lg font-bold">Longa Duração (LARC)</h3>
-                        <p class="text-xs text-gray-500 mb-2">DIU de Cobre, Hormonal e Implante</p>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            <strong>Eficácia:</strong> >99%.<br>
-                            Agem de 3 a 10 anos sem depender da memória diária do usuário. O DIU de Cobre não possui hormônios.
-                        </p>
-                    </div>
-                    <span class="inline-block px-2.5 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-lg text-center">
-                        DIU de Cobre Grátis no SUS
-                    </span>
-                </div>
-
-                <div class="custom-card p-5 space-y-3 flex flex-col justify-between">
-                    <div>
-                        <div class="p-3 bg-blue-100 text-blue-600 w-fit rounded-xl mb-3">
-                            <i data-lucide="pill" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-lg font-bold">Hormonais</h3>
-                        <p class="text-xs text-gray-500 mb-2">Pílulas e Injeções Mensais/Trimestrais</p>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            <strong>Eficácia:</strong> 91% a 99%.<br>
-                            Inibem a ovulação. Requerem rigor nos horários (pílulas) ou datas das injeções para manter a eficácia.
-                        </p>
-                    </div>
-                    <span class="inline-block px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-lg text-center">
-                        Disponível no SUS
-                    </span>
-                </div>
-
-                <div class="custom-card p-5 space-y-3 flex flex-col justify-between">
-                    <div>
-                        <div class="p-3 bg-red-100 text-red-600 w-fit rounded-xl mb-3">
-                            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-lg font-bold">Pílula do Dia Seguinte</h3>
-                        <p class="text-xs text-gray-500 mb-2">Contracepção de Emergência</p>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Deve ser usada até 72h após a relação desprotegida (quanto antes, maior a eficácia). Não deve substituir um método de rotina.
-                        </p>
-                    </div>
-                    <span class="inline-block px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-lg text-center">
-                        Uso Emergencial
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. ABA: VÍDEOS & MÍDIA -->
-        <section id="tab-midia" class="tab-content space-y-6">
-            <div class="border-b border-gray-200 pb-4">
-                <h2 class="text-2xl sm:text-3xl font-bold text-[var(--text-main)] flex items-center gap-3">
-                    <i data-lucide="video" class="w-8 h-8 text-[var(--if-green)]"></i>
-                    Conteúdo Multimídia Recomendado
-                </h2>
-                <p class="text-sm text-[var(--text-muted)] mt-1">
-                    Materiais educativos em vídeo para aprofundar seu conhecimento de forma dinâmica e didática.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="custom-card p-6 border-l-8 border-l-[var(--if-green)] flex flex-col justify-between">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2.5 py-1 bg-green-100 text-[var(--if-green)] text-xs font-bold rounded-md">Vídeo Educativo</span>
-                            <i data-lucide="youtube" class="w-6 h-6 text-red-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Métodos Contraceptivos: Como Escolher?</h3>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Explicação detalhada do Ministério da Saúde sobre o funcionamento e a escolha dos melhores métodos de prevenção.
-                        </p>
-                        <div class="bg-gray-100 p-3 rounded-xl border border-gray-300 font-mono text-xs text-gray-700 break-all select-all flex items-center justify-between gap-2">
-                            <span>https://www.youtube.com/watch?v=dQw4w9WgXcQ</span>
-                        </div>
-                    </div>
-                    <div class="pt-4 flex items-center gap-3">
-                        <a href="https://www.youtube.com/results?search_query=metodos+contraceptivos+sus" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-[var(--if-green)] text-white text-xs font-bold rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors">
-                            <i data-lucide="external-link" class="w-4 h-4"></i> Assistir no YouTube
-                        </a>
-                        <button onclick="copyToClipboard('https://www.youtube.com/results?search_query=metodos+contraceptivos+sus', this)" class="px-4 py-2 bg-gray-200 text-gray-800 text-xs font-bold rounded-lg flex items-center gap-2 hover:bg-gray-300 transition-colors">
-                            <i data-lucide="copy" class="w-4 h-4"></i> Copiar Link
-                        </button>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 border-l-8 border-l-[var(--if-green)] flex flex-col justify-between">
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2.5 py-1 bg-green-100 text-[var(--if-green)] text-xs font-bold rounded-md">Guia Prático</span>
-                            <i data-lucide="youtube" class="w-6 h-6 text-red-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Prevenção Combinada e Testagem Prática de ISTs</h3>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Entenda o que são os testes rápidos do SUS para Sífilis, HIV e Hepatites e como funcionam na prática.
-                        </p>
-                        <div class="bg-gray-100 p-3 rounded-xl border border-gray-300 font-mono text-xs text-gray-700 break-all select-all flex items-center justify-between gap-2">
-                            <span>https://www.youtube.com/results?search_query=prevencao+combinada+ist+sus</span>
-                        </div>
-                    </div>
-                    <div class="pt-4 flex items-center gap-3">
-                        <a href="https://www.youtube.com/results?search_query=prevencao+combinada+ist+sus" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-[var(--if-green)] text-white text-xs font-bold rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors">
-                            <i data-lucide="external-link" class="w-4 h-4"></i> Assistir no YouTube
-                        </a>
-                        <button onclick="copyToClipboard('https://www.youtube.com/results?search_query=prevencao+combinada+ist+sus', this)" class="px-4 py-2 bg-gray-200 text-gray-800 text-xs font-bold rounded-lg flex items-center gap-2 hover:bg-gray-300 transition-colors">
-                            <i data-lucide="copy" class="w-4 h-4"></i> Copiar Link
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. ABA: SAÚDE PÚBLICA (SUS) -->
-        <section id="tab-sus" class="tab-content space-y-6">
-            <div class="border-b border-gray-200 pb-4">
-                <h2 class="text-2xl sm:text-3xl font-bold text-[var(--text-main)] flex items-center gap-3">
-                    <i data-lucide="building-2" class="w-8 h-8 text-blue-600"></i>
-                    Serviços Públicos de Saúde (SUS) em Ipameri
-                </h2>
-                <p class="text-sm text-[var(--text-muted)] mt-1">
-                    Direitos garantidos e serviços inteiramente gratuitos disponíveis nas Unidades Básicas de Saúde (UBS).
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="custom-card p-6 flex gap-4 items-start">
-                    <div class="p-3 bg-blue-100 text-blue-600 rounded-2xl flex-shrink-0">
-                        <i data-lucide="package-check" class="w-6 h-6"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="text-lg font-bold">Distribuição Gratuita de Preservativos</h3>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Preservativos masculinos e femininos, além de géis lubrificantes, estão disponíveis na entrada das UBS de Ipameri sem necessidade de consulta ou identificação.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 flex gap-4 items-start">
-                    <div class="p-3 bg-green-100 font-bold text-[var(--if-green)] rounded-2xl flex-shrink-0">
-                        <i data-lucide="test-tube" class="w-6 h-6"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="text-lg font-bold">Testes Rápidos Gratuitos</h3>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Diagnóstico em até 30 minutos para HIV, Sífilis, Hepatite B e Hepatite C de forma confidencial, sigilosa e com acolhimento profissional.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 flex gap-4 items-start">
-                    <div class="p-3 bg-purple-100 text-purple-600 rounded-2xl flex-shrink-0">
-                        <i data-lucide="syringe" class="w-6 h-6"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="text-lg font-bold">Vacinas Preventivas</h3>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Imunização gratuita contra o HPV e Hepatite B na sala de vacinas da sua UBS de referência em Ipameri.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="custom-card p-6 flex gap-4 items-start">
-                    <div class="p-3 bg-pink-100 text-[var(--primary-pink)] rounded-2xl flex-shrink-0">
-                        <i data-lucide="user-check" class="w-6 h-6"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="text-lg font-bold">Atendimento Médico & Orientação</h3>
-                        <p class="text-sm text-[var(--text-muted)]">
-                            Consultas com enfermeiros e médicos para escolha de contraceptivos, colocação de DIU, exames preventivos (Papanicolau) e tratamento de ISTs.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="custom-card p-6 bg-blue-50 border-blue-200 text-blue-900 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="map-pin" class="w-8 h-8 text-blue-600 flex-shrink-0"></i>
-                    <div>
-                        <h4 class="font-bold text-base">Onde buscar atendimento em Ipameri - GO?</h4>
-                        <p class="text-xs text-blue-800">Procure a Unidade Básica de Saúde (UBS) ou Posto de Saúde mais próximo do seu bairro para obter orientações e insumos gratuitos.</p>
-                    </div>
-                </div>
-                <a href="https://www.google.com/maps/search/UBS+Ipameri+GO" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 whitespace-nowrap transition-colors">
-                    Localizar UBSs
-                </a>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER INSTITUCIONAL -->
-    <footer class="w-full bg-[var(--surface-card)] border-t border-[var(--border-color)] py-6 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
-            <p class="text-sm font-semibold text-[var(--text-main)]">
-                Instituto Federal de Educação, Ciência e Tecnologia Goiano - Campus Ipameri
-            </p>
-            <p class="text-xs text-[var(--text-muted)]">
-                Projeto Educativo de Conscientização em Saúde Sexual e Reprodutiva &bull; 1º Ano de ADM[cite: 3].
-            </p>
-            <p class="text-xs text-gray-500">
-                Desenvolvido com foco em Acessibilidade e Design Responsivo.
-            </p>
-        </div>
-    </footer>
-
-    <!-- WIDGET FLUTUANTE DE ACESSIBILIDADE -->
-    <div class="fixed bottom-6 left-6 z-50">
-        <button id="accessibility-toggle-btn" onclick="toggleAccessibilityMenu()" class="flex items-center gap-2 px-4 py-3 bg-[var(--primary-pink)] text-white font-bold text-sm rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-4 focus:ring-pink-300">
-            <i data-lucide="accessibility" class="w-5 h-5"></i>
-            <span>♿ Acessibilidade</span>
-        </button>
-
-        <div id="accessibility-menu" class="hidden absolute bottom-16 left-0 w-80 sm:w-96 custom-card p-5 space-y-4 shadow-2xl border-2 border-[var(--primary-pink)] bg-[var(--surface-card)] z-50 animate-fadeIn">
-            <div class="flex items-center justify-between border-b pb-3 border-[var(--border-color)]">
-                <h3 class="font-bold text-base flex items-center gap-2 text-[var(--text-main)]">
-                    <i data-lucide="settings" class="w-5 h-5 text-[var(--primary-pink)]"></i>
-                    Recursos de Acessibilidade
-                </h3>
-                <button onclick="toggleAccessibilityMenu()" class="text-gray-400 hover:text-gray-600 text-lg font-bold">&times;</button>
-            </div>
-
-            <div class="space-y-2">
-                <label class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] block">Sintetizador de Voz (Leitura):</label>
-                <div class="grid grid-cols-1 gap-2">
-                    <button onclick="readCurrentTab()" class="px-3 py-2 bg-[var(--primary-pink-bg)] text-[var(--primary-pink)] font-bold text-xs rounded-xl hover:bg-pink-200 transition-colors flex items-center gap-2 border border-[var(--primary-pink)]">
-                        <i data-lucide="volume-2" class="w-4 h-4"></i> Ler Conteúdo da Aba Atual
-                    </button>
-                    <button onclick="readEntirePage()" class="px-3 py-2 bg-gray-100 text-gray-800 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2">
-                        <i data-lucide="book-open" class="w-4 h-4"></i> Leitura Completa Sequencial
-                    </button>
-                    <button onclick="stopSpeech()" class="px-3 py-2 bg-red-100 text-red-700 font-bold text-xs rounded-xl hover:bg-red-200 transition-colors flex items-center gap-2">
-                        <i data-lucide="square" class="w-4 h-4"></i> Interromper Fala
-                    </button>
-                </div>
-            </div>
-
-            <div class="space-y-2 border-t pt-3 border-[var(--border-color)]">
-                <label class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] block">Tamanho da Fonte & Alto Contraste:</label>
-                
-                <div class="flex items-center justify-between gap-2">
-                    <button onclick="adjustFontSize(-0.1)" class="flex-1 py-2 bg-gray-100 border border-gray-300 rounded-xl font-bold text-xs hover:bg-gray-200 transition-colors" title="Diminuir Fonte">
-                        A -
-                    </button>
-                    <button onclick="resetFontSize()" class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-xl font-bold text-xs hover:bg-gray-200 transition-colors" title="Redefinir Fonte">
-                        Redefinir
-                    </button>
-                    <button onclick="adjustFontSize(0.1)" class="flex-1 py-2 bg-gray-100 border border-gray-300 rounded-xl font-bold text-xs hover:bg-gray-200 transition-colors" title="Aumentar Fonte">
-                        A +
-                    </button>
-                </div>
-
-                <button onclick="toggleHighContrast()" class="w-full py-2.5 bg-black text-yellow-300 font-bold text-xs rounded-xl hover:bg-gray-900 border border-yellow-400 transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="sun-moon" class="w-4 h-4"></i> Alternar Alto Contraste
-                </button>
-            </div>
-        </div>
+    <div class="action-btns">
+        <div class="abtn" id="btn-action">AÇÃO / BATER</div>
     </div>
+</div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        lucide.createIcons();
+<script>
+/**
+ * TORTO ARADO - GAME FEEL & AÇÃO (PHASER 3)
+ * Motor de Áudio, Mini-games, Juice Visual e Ritmo
+ */
 
-        function switchTab(tabId) {
-            stopSpeech();
+// --- 1. SÍNTESE DE ÁUDIO PROCEDURAL (Web Audio API) ---
+class SoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.bgmInterval = null;
+    }
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+            this.startBGM();
+        } else if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+    toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+    }
+    playTone(freq, type, duration, vol=0.06) {
+        if (this.muted || !this.ctx) return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+        } catch(e){}
+    }
+    sfxStep() { this.playTone(140 + Math.random()*25, 'triangle', 0.05, 0.015); }
+    sfxPickup() { 
+        this.playTone(523.25, 'sine', 0.08, 0.06); 
+        setTimeout(() => this.playTone(659.25, 'sine', 0.1, 0.06), 60);
+        setTimeout(() => this.playTone(783.99, 'sine', 0.12, 0.06), 120);
+    }
+    sfxClap() { // Som de palma / espantar pássaro
+        this.playTone(220, 'square', 0.08, 0.05);
+        setTimeout(() => this.playTone(440, 'triangle', 0.1, 0.05), 40);
+    }
+    sfxDrum() { // Som de tambor para Jarê
+        this.playTone(90, 'sawtooth', 0.15, 0.12);
+    }
+    sfxText() { this.playTone(320 + Math.random()*50, 'square', 0.02, 0.008); }
+    sfxChupim() {
+        this.playTone(1500, 'sine', 0.04, 0.03);
+        setTimeout(() => this.playTone(1900, 'sine', 0.05, 0.03), 30);
+    }
+    startBGM() {
+        if (this.bgmInterval) return;
+        const notes = [293.66, 329.63, 392.00, 440.00, 523.25, 587.33];
+        this.bgmInterval = setInterval(() => {
+            if (this.ctx && !this.muted) {
+                let note = notes[Math.floor(Math.random() * notes.length)];
+                this.playTone(note, 'sine', 0.6, 0.015);
+                if (Math.random() > 0.4) {
+                    setTimeout(() => this.playTone(note * 1.25, 'triangle', 0.4, 0.01), 200);
+                }
+            }
+        }, 800);
+    }
+}
+const audio = new SoundEngine();
 
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.remove('active'));
+const GAME_WIDTH = 480;
+const GAME_HEIGHT = 270;
 
-            const navButtons = document.querySelectorAll('.nav-tab');
-            navButtons.forEach(btn => {
-                btn.classList.remove('bg-[var(--primary-pink)]', 'text-white', 'shadow-md');
-                btn.classList.add('text-[var(--text-muted)]');
+const touchState = { up: false, down: false, left: false, right: false, interact: false };
+
+function bindTouch(id, key) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = (e) => { e.preventDefault(); audio.init(); touchState[key] = true; };
+    const end = (e) => { e.preventDefault(); touchState[key] = false; };
+    el.addEventListener('touchstart', start);
+    el.addEventListener('touchend', end);
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+}
+bindTouch('btn-up', 'up');
+bindTouch('btn-down', 'down');
+bindTouch('btn-left', 'left');
+bindTouch('btn-right', 'right');
+bindTouch('btn-action', 'interact');
+
+// --- 2. BOOT & TEXTURAS 16-BIT ---
+class BootScene extends Phaser.Scene {
+    constructor() { super({ key: 'BootScene' }); }
+    create() {
+        this.generateLuxuryPixelArtAssets();
+        this.scene.start('TitleScene');
+    }
+    generateLuxuryPixelArtAssets() {
+        this.createPixelTexture('bibiana', [
+            "    6666    ", "   655556   ", "  65433456  ", "  65313156  ", "   6533356  ",
+            "    3333    ", "  11222211  ", " 1112222111 ", " 1111221111 ", "  22222222  ",
+            "  22    22  ", "  33    33  "
+        ], { '1': '#d46b27', '2': '#25758a', '3': '#5c3a21', '4': '#111111', '5': '#4a2810', '6': '#8b5a2b' });
+
+        this.createPixelTexture('belonisia', [
+            "    6666    ", "   655556   ", "  65433456  ", "  65313156  ", "   6533356  ",
+            "    3333    ", "  22111122  ", " 2221111222 ", " 2222112222 ", "  11111111  ",
+            "  11    11  ", "  33    33  "
+        ], { '1': '#e65c00', '2': '#25758a', '3': '#5c3a21', '4': '#111111', '5': '#4a2810', '6': '#8b5a2b' });
+
+        this.createPixelTexture('zeca', [
+            "  77777777  ", " 7777777777 ", "   333333   ", "   343343   ", "   333333   ",
+            "  55222255  ", "  55222255  ", "  22222222  ", "  33    33  "
+        ], { '2': '#3a2e2b', '3': '#5c3a21', '4': '#111111', '5': '#29543e', '7': '#d9b382' });
+
+        this.createPixelTexture('donana', [
+            "    8888    ", "   833338   ", "  83433438  ", "  83131338  ", "   833338   ",
+            "    3333    ", "  99999999  ", " 9999999999 ", "  99999999  ", "   33  33   "
+        ], { '1': '#ffffff', '3': '#4a2c17', '4': '#111111', '8': '#dcdcdc', '9': '#8b0000' });
+
+        this.createPixelTexture('fusco', [
+            "    22100 ", "   223210 ", " 02222220 ", "  222222  ", "  20 200  "
+        ], { '1': '#d2b48c', '2': '#8d5b4c', '3': '#111111' });
+
+        this.createPixelTexture('chupim', [
+            "  110 ", " 1132 ", "  110 ", "  100 "
+        ], { '1': '#1a1a2e', '2': '#e94560', '3': '#ffffff' });
+
+        this.createPixelTexture('flower_pink', [" 121 ", "2332", " 121 "], { '1': '#ffb3c1', '2': '#ff758f', '3': '#ffb703' });
+        this.createPixelTexture('flower_yellow', [" 121 ", "2332", " 121 "], { '1': '#ffee93', '2': '#ffb703', '3': '#d46b27' });
+        this.createPixelTexture('flower_purple', [" 121 ", "2332", " 121 "], { '1': '#e0aaff', '2': '#9d4edd', '3': '#ffb703' });
+        this.createPixelTexture('herb', [" 2 ", "121", "232", " 3 "], { '1': '#52b788', '2': '#b7e4c7', '3': '#2d4a22' });
+        this.createPixelTexture('lenco', ["111", "121", "111"], { '1': '#25758a', '2': '#ffe66d' });
+        this.createPixelTexture('boneca', [" 2 ", "111", " 3 "], { '1': '#ffe66d', '2': '#e63946', '3': '#4a2e1b' });
+        this.createPixelTexture('espelho', [" 22 ", " 21 ", "  3 "], { '1': '#ffffff', '2': '#ffd700', '3': '#4a2e1b' });
+
+        this.createPixelTexture('tree', [
+            "    111111    ", "  1111111111  ", " 111221221111 ", "11112222221111", "11122222222211",
+            " 111222222211 ", "  1111111111  ", "    333333    ", "    33  33    ", "    33  33    "
+        ], { '1': '#1b4332', '2': '#2d6a4f', '3': '#4a2e1b' });
+
+        this.createPixelTexture('petal', ["11", "11"], { '1': '#ffb3c1' });
+        this.createPixelTexture('firefly', ["1"], { '1': '#ffe66d' });
+        this.createPixelTexture('star', [" 1 ", "111", " 1 "], { '1': '#ffe66d' });
+        this.createPixelTexture('candle', ["1", "2"], { '1': '#ffe66d', '2': '#e63946' });
+        this.createPixelTexture('pilao', [" 22 ", "2112", "2112", " 22 "], { '1': '#8d5b4c', '2': '#4a2e1b' });
+    }
+
+    createPixelTexture(key, matrix, palette) {
+        const g = this.add.graphics();
+        const pSize = 2;
+        for (let y = 0; y < matrix.length; y++) {
+            for (let x = 0; x < matrix[y].length; x++) {
+                const char = matrix[y][x];
+                if (char !== ' ' && palette[char]) {
+                    g.fillStyle(Phaser.Display.Color.HexStringToColor(palette[char]).color, 1);
+                    g.fillRect(x * pSize, y * pSize, pSize, pSize);
+                }
+            }
+        }
+        g.generateTexture(key, matrix[0].length * pSize, matrix.length * pSize);
+        g.destroy();
+    }
+}
+
+// --- 3. TELA INICIAL ---
+class TitleScene extends Phaser.Scene {
+    constructor() { super({ key: 'TitleScene' }); }
+    create() {
+        const bg = this.add.graphics();
+        bg.fillGradientStyle(0x2b1e3a, 0x2b1e3a, 0xd46b27, 0xf4a261, 1);
+        bg.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, 'tree').setScale(4.5);
+        this.add.image(GAME_WIDTH / 2 - 24, GAME_HEIGHT / 2 + 50, 'bibiana').setScale(2.2);
+        this.add.image(GAME_WIDTH / 2 + 24, GAME_HEIGHT / 2 + 50, 'belonisia').setScale(2.2);
+
+        this.add.particles(0, 0, 'petal', {
+            x: { min: 0, max: GAME_WIDTH }, y: 0, lifespan: 4000, speedY: { min: 20, max: 50 },
+            speedX: { min: -10, max: 10 }, scale: { start: 1, end: 0.5 }, quantity: 1, frequency: 300
+        });
+
+        this.add.text(GAME_WIDTH / 2, 45, 'TORTO ARADO', {
+            fontFamily: 'Courier New', fontSize: '28px', fontStyle: 'bold', color: '#fff8e7', stroke: '#1a0c06', strokeThickness: 5
+        }).setOrigin(0.5);
+
+        this.add.text(GAME_WIDTH / 2, 72, 'Edição Game Feel & Ação', {
+            fontFamily: 'Courier New', fontSize: '10px', color: '#ffe66d', fontStyle: 'italic'
+        }).setOrigin(0.5);
+
+        const muteBtn = this.add.text(GAME_WIDTH - 20, 15, '🔊 Som: ON', {
+            fontFamily: 'Courier New', fontSize: '9px', color: '#ffffff', backgroundColor: '#4a2e1b', padding: { x: 4, y: 2 }
+        }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+        
+        muteBtn.on('pointerdown', () => {
+            let isMuted = audio.toggleMute();
+            muteBtn.setText(isMuted ? '🔇 Som: OFF' : '🔊 Som: ON');
+        });
+
+        const btnBg = this.add.rectangle(GAME_WIDTH / 2, 205, 170, 32, 0x6b2d18)
+            .setStrokeStyle(2, 0xf4a261).setInteractive({ useHandCursor: true });
+
+        const btnText = this.add.text(GAME_WIDTH / 2, 205, 'INICIAR JORNADA', {
+            fontFamily: 'Courier New', fontSize: '11px', fontStyle: 'bold', color: '#ffffff'
+        }).setOrigin(0.5);
+
+        const startGame = () => {
+            audio.init();
+            audio.sfxPickup();
+            this.scene.start('GameScene');
+        };
+
+        btnBg.on('pointerover', () => { btnBg.setFillStyle(0xd46b27); btnText.setColor('#ffe66d'); });
+        btnBg.on('pointerout', () => { btnBg.setFillStyle(0x6b2d18); btnText.setColor('#ffffff'); });
+        btnBg.on('pointerdown', startGame);
+
+        this.input.keyboard.on('keydown-SPACE', startGame);
+        this.input.keyboard.on('keydown-ENTER', startGame);
+
+        this.tweens.add({
+            targets: [btnBg, btnText], y: '+=2', duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+    }
+}
+
+// --- 4. CENA DO JOGO E MINI-GAMES ---
+class GameScene extends Phaser.Scene {
+    constructor() { super({ key: 'GameScene' }); }
+
+    create() {
+        this.currentCap = 1;
+        this.dialogueActive = false;
+        this.dialogueQueue = [];
+        this.collectedItemsCount = 0;
+        this.miniGameActive = false;
+
+        this.buildRichEnvironment();
+
+        this.interactables = this.physics.add.staticGroup();
+        this.chupinsGroup = this.physics.add.group();
+
+        this.playerShadow = this.add.ellipse(80, 148, 16, 8, 0x000000, 0.4);
+        this.player = this.physics.add.sprite(80, 140, 'bibiana').setScale(2).setCollideWorldBounds(true);
+
+        this.tweens.add({
+            targets: this.player, scaleY: 2.05, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+
+        // Partículas
+        this.add.particles(0, 0, 'petal', {
+            x: { min: 0, max: GAME_WIDTH }, y: 0, lifespan: 4000, speedY: { min: 15, max: 35 },
+            speedX: { min: -10, max: 10 }, scale: { start: 1, end: 0.4 }, quantity: 1, frequency: 300
+        });
+
+        this.add.particles(0, 0, 'firefly', {
+            x: { min: 0, max: GAME_WIDTH }, y: { min: 0, max: GAME_HEIGHT - 40 }, lifespan: 3000,
+            speedX: { min: -10, max: 10 }, speedY: { min: -10, max: 10 }, scale: { start: 1, end: 0.2 },
+            alpha: { start: 0.8, end: 0.1 }, quantity: 1, frequency: 350
+        });
+
+        const vignette = this.add.graphics();
+        vignette.fillGradientStyle(0xf4a261, 0xf4a261, 0x2b1e3a, 0x2b1e3a, 0.15);
+        vignette.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        vignette.setScrollFactor(0);
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.wasd = this.input.keyboard.addKeys('W,A,S,D');
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+        this.createUI();
+        this.loadCapitulo(1);
+    }
+
+    buildRichEnvironment() {
+        const baseGrama = this.add.graphics();
+        baseGrama.fillStyle(0x2d4a22, 1);
+        baseGrama.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        baseGrama.fillStyle(0x386641, 0.6);
+        for (let i = 0; i < 40; i++) {
+            baseGrama.fillRect(Math.random() * GAME_WIDTH, Math.random() * GAME_HEIGHT, 16, 16);
+        }
+
+        baseGrama.fillStyle(0x8d5b4c, 0.9);
+        baseGrama.fillRoundedRect(40, 130, 400, 36, 10);
+        baseGrama.fillStyle(0xa98467, 0.8);
+        for (let i = 50; i < 420; i += 24) {
+            baseGrama.fillCircle(i, 148, 3);
+        }
+
+        this.river = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 22, GAME_WIDTH, 44, 0x1d4e89);
+        this.riverReflex = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 32, GAME_WIDTH, 6, 0x48cae4, 0.5);
+        this.tweens.add({ targets: this.riverReflex, alpha: 0.9, duration: 600, yoyo: true, repeat: -1 });
+
+        baseGrama.fillStyle(0x582f0e, 1);
+        for (let x = 20; x < GAME_WIDTH - 20; x += 30) {
+            baseGrama.fillRect(x, 85, 4, 30);
+        }
+        baseGrama.fillRect(10, 92, GAME_WIDTH - 20, 4);
+
+        const flowerTypes = ['flower_pink', 'flower_yellow', 'flower_purple'];
+        for (let i = 0; i < 22; i++) {
+            let fx = Phaser.Math.Between(20, GAME_WIDTH - 20);
+            let fy = Phaser.Math.Between(40, GAME_HEIGHT - 50);
+            let f = this.add.image(fx, fy, Phaser.Math.RND.pick(flowerTypes)).setScale(1.2);
+            this.tweens.add({ targets: f, angle: { from: -5, to: 5 }, duration: 1500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        }
+
+        this.add.image(70, 50, 'tree').setScale(3);
+        this.add.image(410, 60, 'tree').setScale(3);
+    }
+
+    // --- SISTEMA DE JUICE (FEEDBACK VISUAL) ---
+    triggerJuice(x, y) {
+        // Micro-tremida de câmera
+        this.cameras.main.shake(150, 0.008);
+
+        // Explosão de estrelinhas e pétalas
+        const emitter = this.add.particles(x, y, 'star', {
+            speed: { min: 40, max: 100 },
+            angle: { min: 0, max: 360 },
+            scale: { start: 1, end: 0.2 },
+            lifespan: 500,
+            quantity: 8
+        });
+        this.time.delayedCall(500, () => emitter.destroy());
+
+        // Pulinho de alegria do personagem
+        this.tweens.add({
+            targets: this.player,
+            y: '-=12',
+            duration: 150,
+            yoyo: true,
+            ease: 'Quad.easeOut'
+        });
+    }
+
+    // --- CAPÍTULOS NARRATIVOS & MINI-GAMES ---
+    loadCapitulo(capNum) {
+        this.currentCap = capNum;
+        this.collectedItemsCount = 0;
+        this.interactables.clear(true, true);
+        this.chupinsGroup.clear(true, true);
+        if (this.pilaoObj) this.pilaoObj.destroy();
+        if (this.rhythmContainer) this.rhythmContainer.destroy();
+
+        if (this.capTitleText) {
+            if (capNum === 1) {
+                this.capTitleText.setText('CAPÍTULO 1: Fio de Corte');
+                this.hudObjText.setText('Colete 3 lembranças e brinque com o Fusco.');
+                this.setupCapitulo1();
+            } else if (capNum === 2) {
+                this.capTitleText.setText('CAPÍTULO 2: Torto Arado');
+                this.hudObjText.setText('Bata palmas para espantar chupins e use o pilão!');
+                this.setupCapitulo2();
+            } else if (capNum === 3) {
+                this.capTitleText.setText('CAPÍTULO 3: Rio de Sangue');
+                this.hudObjText.setText('Acenda as velas no desafio rítmico do tambor!');
+                this.setupCapitulo3();
+            }
+        }
+    }
+
+    setupCapitulo1() {
+        this.player.setPosition(60, 140);
+        this.add.rectangle(380, 75, 110, 70, 0x7f4f24).setStrokeStyle(2, 0x4a2e1b);
+        this.add.rectangle(380, 38, 120, 18, 0x582f0e);
+
+        this.belonisia = this.physics.add.staticSprite(100, 140, 'belonisia').setScale(2);
+        this.donana = this.physics.add.staticSprite(370, 110, 'donana').setScale(2);
+        this.fusco = this.physics.add.sprite(180, 150, 'fusco').setScale(2);
+        this.tweens.add({ targets: this.fusco, y: '-=6', duration: 450, yoyo: true, repeat: -1 });
+
+        const item1 = this.interactables.create(150, 80, 'lenco').setScale(1.5);
+        item1.setData('itemID', 'lenço de algodão');
+        const item2 = this.interactables.create(270, 190, 'boneca').setScale(1.5);
+        item2.setData('itemID', 'boneca de milho');
+        const item3 = this.interactables.create(410, 130, 'espelho').setScale(1.5);
+        item3.setData('itemID', 'espelho antigo');
+
+        this.startDialogueSequence([
+            { speaker: 'Belonísia', portrait: 'belonisia', text: 'Bibiana... encontre as lembranças no terreiro. [Elo Silencioso 👁️]' }
+        ]);
+    }
+
+    setupCapitulo2() {
+        this.player.setPosition(60, 140);
+        this.zeca = this.physics.add.staticSprite(220, 95, 'zeca').setScale(2);
+
+        // Pilão de Zeca Chapéu Grande
+        this.pilaoObj = this.physics.add.staticSprite(260, 110, 'pilao').setScale(1.8);
+
+        const h1 = this.interactables.create(120, 80, 'herb').setScale(1.6);
+        h1.setData('itemID', 'Capim-Santo');
+        const h2 = this.interactables.create(340, 210, 'herb').setScale(1.6);
+        h2.setData('itemID', 'Carqueja');
+        const h3 = this.interactables.create(440, 90, 'herb').setScale(1.6);
+        h3.setData('itemID', 'Arruda');
+
+        // Spawna Chupins no Arrozal
+        for (let i = 0; i < 5; i++) {
+            let chupim = this.chupinsGroup.create(300 + (i * 30), 150 + (i * 12), 'chupim').setScale(1.8);
+            chupim.setData('initialX', chupim.x);
+        }
+
+        this.startDialogueSequence([
+            { speaker: 'Zeca Chapéu Grande', portrait: 'zeca', text: 'Pressione ESPAÇO para BATER PALMAS e espantar os chupins! Use o pilão para misturar as ervas.' }
+        ]);
+    }
+
+    setupCapitulo3() {
+        this.player.setPosition(60, 140);
+        this.belonisia = this.physics.add.staticSprite(140, 140, 'belonisia').setScale(2);
+        this.salu = this.physics.add.staticSprite(260, 120, 'zeca').setScale(2);
+
+        for (let i = 0; i < 6; i++) {
+            let candle = this.add.image(170 + (i * 45), 205, 'candle').setScale(1.6);
+            candle.setData('lit', false);
+            this.candlesArr = this.candlesArr || [];
+            this.candlesArr.push(candle);
+        }
+
+        this.setupRhythmGame();
+
+        this.startDialogueSequence([
+            { speaker: 'Salu', portrait: 'zeca', text: 'Festa de Jarê! Pressione ESPAÇO no tempo exato da batida do tambor para acender as velas!' }
+        ]);
+    }
+
+    // --- AÇÃO DE BATER PALMAS (Espantar Chupins em Área) ---
+    realizarPalmas() {
+        audio.sfxClap();
+        this.cameras.main.shake(120, 0.005);
+
+        // Onda Sonora Visual expandindo
+        const wave = this.add.circle(this.player.x, this.player.y, 10, 0xfff8e7, 0.6);
+        this.tweens.add({
+            targets: wave,
+            radius: 90,
+            alpha: 0,
+            duration: 400,
+            onComplete: () => wave.destroy()
+        });
+
+        // Espanta chupins próximos
+        if (this.currentCap === 2) {
+            this.chupinsGroup.children.each(chupim => {
+                if (chupim.active && Phaser.Math.Distance.Between(this.player.x, this.player.y, chupim.x, chupim.y) < 85) {
+                    audio.sfxChupim();
+                    this.tweens.add({
+                        targets: chupim,
+                        x: chupim.x + 100,
+                        y: chupim.y - 60,
+                        alpha: 0,
+                        duration: 500,
+                        onComplete: () => {
+                            chupim.destroy();
+                            if (this.chupinsGroup.countActive() === 0 && this.collectedItemsCount >= 3) {
+                                this.hudObjText.setText('Tudo pronto! Fale com o Pai Zeca Chapéu Grande.');
+                            }
+                        }
+                    });
+                }
             });
+        }
 
-            const targetTab = document.getElementById(`tab-${tabId}`);
-            if (targetTab) {
-                targetTab.classList.add('active');
+        // Mini-game de Ritmo (Capítulo 3)
+        if (this.currentCap === 3 && this.rhythmActive) {
+            audio.sfxDrum();
+            let dist = Math.abs(this.rhythmMarker.x - this.targetZone.x);
+            if (dist < 22) {
+                // Acertou o tempo!
+                this.triggerJuice(this.player.x, this.player.y - 20);
+                if (this.candlesArr) {
+                    let unlit = this.candlesArr.find(c => !c.getData('lit'));
+                    if (unlit) {
+                        unlit.setData('lit', true);
+                        unlit.setTint(0xffff00);
+                        this.tweens.add({ targets: unlit, scale: 2.2, duration: 150, yoyo: true });
+                    }
+                }
+                if (this.candlesArr.every(c => c.getData('lit'))) {
+                    this.rhythmActive = false;
+                    this.time.delayedCall(1000, () => this.showEndingScreen());
+                }
             }
-
-            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
-            if (targetBtn) {
-                targetBtn.classList.add('bg-[var(--primary-pink)]', 'text-white', 'shadow-md');
-                targetBtn.classList.remove('text-[var(--text-muted)]');
-            }
         }
+    }
 
-        function toggleAccessibilityMenu() {
-            const menu = document.getElementById('accessibility-menu');
-            menu.classList.toggle('hidden');
-        }
+    setupRhythmGame() {
+        this.rhythmActive = true;
+        this.rhythmContainer = this.add.container(GAME_WIDTH / 2, 45);
 
-        let currentFontScale = 1.0;
-        function adjustFontSize(delta) {
-            currentFontScale = Math.min(Math.max(currentFontScale + delta, 0.8), 1.4);
-            document.documentElement.style.setProperty('--font-scale', `${currentFontScale}rem`);
-        }
+        const barBg = this.add.rectangle(0, 0, 180, 16, 0x1a0c06).setStrokeStyle(1, 0xd46b27);
+        this.targetZone = this.add.rectangle(0, 0, 24, 16, 0xe76f51, 0.8);
+        this.rhythmMarker = this.add.rectangle(-80, 0, 6, 20, 0xfff8e7);
 
-        function resetFontSize() {
-            currentFontScale = 1.0;
-            document.documentElement.style.setProperty('--font-scale', '1rem');
-        }
+        this.rhythmContainer.add([barBg, this.targetZone, this.rhythmMarker]);
 
-        function toggleHighContrast() {
-            document.body.classList.toggle('high-contrast');
-        }
+        this.rhythmTween = this.tweens.add({
+            targets: this.rhythmMarker,
+            x: 80,
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+    }
 
-        function copyToClipboard(text, buttonEl) {
-            const tempInput = document.createElement('input');
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
+    // --- INTERAÇÃO E QUESTS ---
+    handleInteractions() {
+        if (this.dialogueActive) return;
 
-            const originalHTML = buttonEl.innerHTML;
-            buttonEl.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-green-600"></i> Copiado!`;
-            buttonEl.classList.add('bg-green-100', 'text-green-800');
-            lucide.createIcons();
+        // Ação de Bater Palmas / Espantar / Interagir
+        this.realizarPalmas();
 
-            setTimeout(() => {
-                buttonEl.innerHTML = originalHTML;
-                buttonEl.classList.remove('bg-green-100', 'text-green-800');
-                lucide.createIcons();
-            }, 2000);
-        }
-
-        // Sintetizador de Voz e Botão de Parar Absolutamente Funcional
-        let synth = window.speechSynthesis;
-        let speechQueueItems = [];
-
-        function getPtBrVoice() {
-            if (!synth) return null;
-            const voices = synth.getVoices();
-            return voices.find(v => v.lang.includes('pt-BR') || v.lang.includes('pt_BR')) || voices.find(v => v.lang.includes('pt')) || null;
-        }
-
-        function stopSpeech() {
-            if (synth) {
-                synth.cancel(); // Interrompe imediatamente qualquer áudio ativo
-            }
-            speechQueueItems = [];
-            const banner = document.getElementById('speech-banner');
-            if (banner) {
-                banner.classList.add('hidden');
-            }
-            clearHighlights();
-        }
-
-        function clearHighlights() {
-            const highlighted = document.querySelectorAll('.speaking-highlight');
-            highlighted.forEach(el => el.classList.remove('speaking-highlight'));
-        }
-
-        function readCurrentTab() {
-            stopSpeech();
-            const activeTab = document.querySelector('.tab-content.active');
-            if (!activeTab) return;
-
-            const cards = activeTab.querySelectorAll('.custom-card, h2, h3');
-            if (cards.length === 0) return;
-
-            speakCardsSequentially(Array.from(cards));
-        }
-
-        function readEntirePage() {
-            stopSpeech();
-            const activeTab = document.querySelector('.tab-content.active');
-            if (!activeTab) return;
-
-            const cards = activeTab.querySelectorAll('.custom-card');
-            speakCardsSequentially(Array.from(cards));
-        }
-
-        function speakCardsSequentially(elements) {
-            if (!('speechSynthesis' in window)) {
-                alert('A síntese de voz não é suportada neste navegador.');
+        if (this.currentCap === 1) {
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.belonisia.x, this.belonisia.y) < 35) {
+                this.startDialogueSequence([
+                    { speaker: 'Belonísia', portrait: 'belonisia', text: 'Nossos olhares se entendem sem palavras... Encontre as lembranças no terreiro. [Elo Silencioso 👁️]' }
+                ]);
                 return;
             }
-
-            speechQueueItems = elements;
-            let index = 0;
-            const banner = document.getElementById('speech-banner');
-            const bannerText = document.getElementById('speech-banner-text');
-            banner.classList.remove('hidden');
-
-            function speakNext() {
-                if (speechQueueItems.length === 0 || index >= speechQueueItems.length) {
-                    stopSpeech();
-                    return;
-                }
-
-                clearHighlights();
-                const currentEl = speechQueueItems[index];
-                
-                if (!document.body.contains(currentEl)) {
-                    index++;
-                    speakNext();
-                    return;
-                }
-
-                currentEl.classList.add('speaking-highlight');
-                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                const textToRead = currentEl.innerText || currentEl.textContent;
-                bannerText.innerText = `🔊 Lendo: "${textToRead.substring(0, 45)}..."`;
-
-                const utterance = new SpeechSynthesisUtterance(textToRead);
-                utterance.lang = 'pt-BR';
-                
-                const voice = getPtBrVoice();
-                if (voice) utterance.voice = voice;
-
-                utterance.onend = () => {
-                    if (speechQueueItems.length > 0) {
-                        index++;
-                        speakNext();
-                    }
-                };
-
-                utterance.onerror = () => {
-                    if (speechQueueItems.length > 0) {
-                        index++;
-                        speakNext();
-                    }
-                };
-
-                synth.speak(utterance);
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.donana.x, this.donana.y) < 35) {
+                this.startDialogueSequence([
+                    { speaker: 'Vó Donana', portrait: 'donana', text: 'Meninas... respeitem as histórias guardadas no fundo da mala...' }
+                ]);
+                return;
             }
-
-            speakNext();
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.fusco.x, this.fusco.y) < 35) {
+                audio.sfxPickup();
+                this.startDialogueSequence([
+                    { speaker: 'Fusco', portrait: 'fusco', text: 'Au! Au! (Fusco abana o rabo fofamente pulando em suas 3 patas).' }
+                ]);
+                return;
+            }
+        } else if (this.currentCap === 2) {
+            // Interação com o Pilão de Zeca
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.pilaoObj.x, this.pilaoObj.y) < 35) {
+                audio.sfxPickup();
+                this.triggerJuice(this.pilaoObj.x, this.pilaoObj.y);
+                this.startDialogueSequence([
+                    { speaker: 'Zeca Chapéu Grande', portrait: 'zeca', text: 'Você socou as ervas no pilão! A garrafada de Jarê está ganhando força.' }
+                ]);
+                return;
+            }
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.zeca.x, this.zeca.y) < 35) {
+                if (this.collectedItemsCount >= 3 && this.chupinsGroup.countActive() === 0) {
+                    this.startDialogueSequence([
+                        { speaker: 'Zeca Chapéu Grande', portrait: 'zeca', text: 'Abençoadas sejam! As ervas e a colheita estão salvas. Vamos unir o povo de Água Negra!' }
+                    ], () => this.loadCapitulo(3));
+                } else {
+                    this.startDialogueSequence([
+                        { speaker: 'Zeca Chapéu Grande', portrait: 'zeca', text: `Ervas colhidas: ${this.collectedItemsCount}/3. Espante os chupins do arrozal!` }
+                    ]);
+                }
+                return;
+            }
+        } else if (this.currentCap === 3) {
+            if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.belonisia.x, this.belonisia.y) < 35) {
+                this.startDialogueSequence([
+                    { speaker: 'Belonísia', portrait: 'belonisia', text: 'Bibiana, o rio Utinga corre em nossas veias. Somos a memória viva dos nossos ancestrais.' }
+                ]);
+                return;
+            }
         }
 
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                getPtBrVoice();
-            };
+        // Coleta de Itens com Juice
+        this.interactables.children.each(item => {
+            if (item.active && Phaser.Math.Distance.Between(this.player.x, this.player.y, item.x, item.y) < 30) {
+                audio.sfxPickup();
+                let itemName = item.getData('itemID');
+                this.triggerJuice(item.x, item.y);
+                item.destroy();
+                this.collectedItemsCount++;
+
+                if (this.currentCap === 1) {
+                    this.startDialogueSequence([
+                        { speaker: 'Bibiana', portrait: 'bibiana', text: `Você encontrou: ${itemName}! (${this.collectedItemsCount}/3).` }
+                    ]);
+                    if (this.collectedItemsCount >= 3) {
+                        this.hudObjText.setText('Lembranças reunidas! O segredo aproxima as irmãs...');
+                        this.time.delayedCall(2000, () => this.loadCapitulo(2));
+                    }
+                } else if (this.currentCap === 2) {
+                    this.startDialogueSequence([
+                        { speaker: 'Bibiana', portrait: 'bibiana', text: `Você colheu a erva medicinal: ${itemName}!` }
+                    ]);
+                }
+            }
+        });
+    }
+
+    // --- UI E DIÁLOGOS ---
+    createUI() {
+        const hudBg = this.add.rectangle(GAME_WIDTH / 2, 16, GAME_WIDTH - 20, 26, 0x1a0c06, 0.85)
+            .setStrokeStyle(1, 0xd46b27);
+
+        this.capTitleText = this.add.text(18, 10, '', {
+            fontFamily: 'Courier New', fontSize: '10px', fontStyle: 'bold', color: '#f4a261'
+        });
+
+        this.hudObjText = this.add.text(175, 11, '', {
+            fontFamily: 'Courier New', fontSize: '8px', color: '#fff8e7'
+        });
+
+        this.dialogueBox = this.add.container(0, 0);
+        
+        const boxBg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 44, GAME_WIDTH - 20, 72, 0x2b1810, 0.96)
+            .setStrokeStyle(2, 0x8b5a2b);
+        
+        const portraitBg = this.add.rectangle(44, GAME_HEIGHT - 44, 46, 52, 0x4a2e1b)
+            .setStrokeStyle(1, 0xd46b27);
+
+        this.portraitSprite = this.add.sprite(44, GAME_HEIGHT - 44, 'bibiana').setScale(2.2);
+
+        this.speakerText = this.add.text(76, GAME_HEIGHT - 72, '', {
+            fontFamily: 'Courier New', fontSize: '11px', fontStyle: 'bold', color: '#f4a261'
+        });
+
+        this.dialogueBodyText = this.add.text(76, GAME_HEIGHT - 56, '', {
+            fontFamily: 'Courier New', fontSize: '9px', color: '#fff8e7', wordWrap: { width: GAME_WIDTH - 105 }
+        });
+
+        this.nextArrow = this.add.text(GAME_WIDTH - 25, GAME_HEIGHT - 22, '▼', {
+            fontFamily: 'Courier New', fontSize: '10px', color: '#e76f51'
+        });
+
+        this.tweens.add({ targets: this.nextArrow, y: '+=3', duration: 400, yoyo: true, repeat: -1 });
+
+        this.dialogueBox.add([boxBg, portraitBg, this.portraitSprite, this.speakerText, this.dialogueBodyText, this.nextArrow]);
+        this.dialogueBox.setVisible(false);
+    }
+
+    startDialogueSequence(dialogues, onComplete = null) {
+        this.dialogueQueue = dialogues;
+        this.onDialogueComplete = onComplete;
+        this.dialogueActive = true;
+        this.dialogueBox.setVisible(true);
+        this.advanceDialogue();
+    }
+
+    advanceDialogue() {
+        if (this.dialogueTimer) this.dialogueTimer.remove();
+
+        if (this.dialogueQueue.length === 0) {
+            this.dialogueActive = false;
+            this.dialogueBox.setVisible(false);
+            if (this.onDialogueComplete) this.onDialogueComplete();
+            return;
         }
-    </script>
+
+        const current = this.dialogueQueue.shift();
+        this.speakerText.setText(current.speaker);
+        this.portraitSprite.setTexture(current.portrait);
+        this.dialogueBodyText.setText('');
+
+        let charIndex = 0;
+        const fullText = current.text;
+
+        this.dialogueTimer = this.time.addEvent({
+            delay: 20,
+            repeat: fullText.length - 1,
+            callback: () => {
+                this.dialogueBodyText.setText(fullText.substring(0, charIndex + 1));
+                charIndex++;
+                if (charIndex % 3 === 0) audio.sfxText();
+            }
+        });
+    }
+
+    showEndingScreen() {
+        this.dialogueActive = true;
+        if (this.rhythmTween) this.rhythmTween.stop();
+        this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0d0907, 0.96);
+        
+        this.add.text(GAME_WIDTH / 2, 60, 'FIM DA JORNADA', {
+            fontFamily: 'Courier New', fontSize: '22px', fontStyle: 'bold', color: '#f4a261'
+        }).setOrigin(0.5);
+
+        const poem = [
+            "Bibiana e Belonísia permaneceram unidas,",
+            "como o curso dos rios Santo Antônio e Utinga.",
+            "A terra de Água Negra guardará suas vozes e passos.",
+            "",
+            "\"Sobre a terra tudo é força, tudo é permanência.\"",
+            "— Itamar Vieira Junior"
+        ];
+
+        this.add.text(GAME_WIDTH / 2, 140, poem.join('\n'), {
+            fontFamily: 'Courier New', fontSize: '10px', color: '#fff8e7', align: 'center', lineSpacing: 6
+        }).setOrigin(0.5);
+
+        const restartBtn = this.add.text(GAME_WIDTH / 2, 230, '[ JOGAR NOVAMENTE ]', {
+            fontFamily: 'Courier New', fontSize: '11px', fontStyle: 'bold', color: '#ffe66d'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        restartBtn.on('pointerdown', () => location.reload());
+    }
+
+    update() {
+        if (this.dialogueActive) {
+            this.player.setVelocity(0);
+            this.playerShadow.setPosition(this.player.x, this.player.y + 10);
+            if (Phaser.Input.Keyboard.JustDown(this.spaceKey) || touchState.interact) {
+                touchState.interact = false;
+                this.advanceDialogue();
+            }
+            return;
+        }
+
+        const speed = 120;
+        let vx = 0, vy = 0;
+
+        if (this.cursors.left.isDown || this.wasd.A.isDown || touchState.left) { vx = -speed; this.player.flipX = true; }
+        else if (this.cursors.right.isDown || this.wasd.D.isDown || touchState.right) { vx = speed; this.player.flipX = false; }
+
+        if (this.cursors.up.isDown || this.wasd.W.isDown || touchState.up) { vy = -speed; }
+        else if (this.cursors.down.isDown || this.wasd.S.isDown || touchState.down) { vy = speed; }
+
+        this.player.setVelocity(vx, vy);
+        this.playerShadow.setPosition(this.player.x, this.player.y + 10);
+
+        if (vx !== 0 || vy !== 0) {
+            if (Math.random() < 0.05) audio.sfxStep();
+        }
+
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey) || touchState.interact) {
+            touchState.interact = false;
+            this.handleInteractions();
+        }
+    }
+}
+
+// --- 5. INICIALIZAÇÃO DO PHASER 3 ---
+const config = {
+    type: Phaser.AUTO,
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
+    parent: 'game-container',
+    pixelArt: true,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    physics: {
+        default: 'arcade',
+        arcade: { debug: false }
+    },
+    scene: [BootScene, TitleScene, GameScene]
+};
+
+const game = new Phaser.Game(config);
+</script>
 </body>
 </html>
